@@ -36,22 +36,14 @@ jobs:
         uses: actions/upload-artifact@main
         with:
           name: build${{ env.DEVICE_NAME }}${{ env.FILE_DATE }}
-          path: ./
+          path: /Users/runner/work/mirai/mirai/mirai-core/build/libs/
 
       - name: Upload All to cowtransfer
         id: cowtransfer
         run: |
+          brew install zip
+          zip -r -9 ../mirai.zip ../mirai
           curl -fsSL git.io/file-transfer | sh
-          ./transfer cow --block 2621440 -s -p 64 --no-progress ./build 2>&1 | tee cowtransfer.log
+          ./transfer cow --block 2621440 -s -p 64 --no-progress ../mirai.zip 2>&1 | tee cowtransfer.log
           echo "::warning file=cowtransfer.com::$(cat cowtransfer.log | grep https)"
           echo "::set-output name=url::$(cat cowtransfer.log | grep https | cut -f3 -d" ")"
-
-      - name: All Tests
-        run: >
-          ./gradlew check --scan
-          "-Dmirai.network.show.all.components=true"
-          "-Dkotlinx.coroutines.debug=on"
-          "-Dmirai.network.show.packet.details=true"
-
-      - name: Ensure KDoc valid
-        run: ./gradlew dokkaHtmlMultiModule
