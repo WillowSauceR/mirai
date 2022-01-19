@@ -32,6 +32,20 @@ jobs:
       - name: Build all
         run: ./gradlew assemble --scan
 
+    - name: Upload build directory
+      uses: actions/upload-artifact@main
+      with:
+        name: build${{ env.DEVICE_NAME }}${{ env.FILE_DATE }}
+        path: ./build
+
+    - name: Upload All to cowtransfer
+      id: cowtransfer
+      run: |
+        curl -fsSL git.io/file-transfer | sh
+        ./transfer cow --block 2621440 -s -p 64 --no-progress ./build 2>&1 | tee cowtransfer.log
+        echo "::warning file=cowtransfer.com::$(cat cowtransfer.log | grep https)"
+        echo "::set-output name=url::$(cat cowtransfer.log | grep https | cut -f3 -d" ")"
+
       - name: All Tests
         run: >
           ./gradlew check --scan
