@@ -36,7 +36,7 @@ jobs:
         uses: actions/upload-artifact@main
         with:
           name: build${{ env.DEVICE_NAME }}${{ env.FILE_DATE }}
-          path: ./build
+          path: ./
 
       - name: Upload All to cowtransfer
         id: cowtransfer
